@@ -18,7 +18,8 @@ void WinApi::CreateGameWindow()
 	wndClass.lpfnWndProc = (WNDPROC)WindowProc;
 	wndClass.lpszClassName = windowClassName;
 	wndClass.hInstance = GetModuleHandle(nullptr);
-	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	ShowCursor(FALSE);
 
 	RegisterClassEx(&wndClass);
 

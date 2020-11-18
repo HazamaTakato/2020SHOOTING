@@ -28,40 +28,41 @@ void GameScene::Initialize(DirectXSet* dx, Input* input)
 	// 背景スプライト生成
 	spriteBG = Sprite::Create(1, { 0.0f,0.0f });
 
+	//object3dはマウスカーソル
 	object3d = Object3d::Create();
 	object3d->Update();
 }
 
 void GameScene::Update()
 {
-	if (input->PushKey(DIK_UP) || input->PushKey(DIK_DOWN) || input->PushKey(DIK_RIGHT) || input->PushKey(DIK_LEFT))
-	{
-		// 現在の座標を取得
-		XMFLOAT3 position = object3d->GetPosition();
+	//if (input->PushKey(DIK_UP) || input->PushKey(DIK_DOWN) || input->PushKey(DIK_RIGHT) || input->PushKey(DIK_LEFT))
+	//{
+	//	// 現在の座標を取得
+	//	XMFLOAT3 position = object3d->GetPosition();
 
-		// 移動後の座標を計算
-		if (input->PushKey(DIK_UP)) { position.y += 0.5f; }
-		else if (input->PushKey(DIK_DOWN)) { position.y -= 0.5f; }
-		if (input->PushKey(DIK_RIGHT)) { position.x += 0.5f; }
-		else if (input->PushKey(DIK_LEFT)) { position.x -= 0.5f; }
+	//	// 移動後の座標を計算
+	//	if (input->PushKey(DIK_UP)) { position.y += 0.5f; }
+	//	else if (input->PushKey(DIK_DOWN)) { position.y -= 0.5f; }
+	//	if (input->PushKey(DIK_RIGHT)) { position.x += 0.5f; }
+	//	else if (input->PushKey(DIK_LEFT)) { position.x -= 0.5f; }
 
-		// 座標の変更を反映
-		object3d->SetPosition(position);
-	}
+	//	// 座標の変更を反映
+	//	object3d->SetPosition(position);
+	//}
 
-	if (input->LeftPush())
-	{
-		XMFLOAT3 position = object3d->GetPosition();
-		position.x -= 0.1f;
-		object3d->SetPosition(position);
-	}
+	//if (input->LeftPush())
+	//{
+	//	XMFLOAT3 position = object3d->GetPosition();
+	//	position.x -= 0.1f;
+	//	object3d->SetPosition(position);
+	//}
 
-	if (input->RightPush())
-	{
-		XMFLOAT3 position = object3d->GetPosition();
-		position.x += 0.1f;
-		object3d->SetPosition(position);
-	}
+	//if (input->RightPush())
+	//{
+	//	XMFLOAT3 position = object3d->GetPosition();
+	//	position.x += 0.1f;
+	//	object3d->SetPosition(position);
+	//}
 
 	if (input->mouseX())
 	{

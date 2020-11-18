@@ -532,10 +532,10 @@ void Object3d::CreateModel()
 
 	//四角形の頂点データ
 	VertexPosNormalUv verticesSquare[] = {
-		{{-5.0f,-5.0f,0.0f},{0,0,1},{0,1}},//左下
-		{{-5.0f,+5.0f,0.0f},{0,0,1},{0,0}},//左上
-		{{+5.0f,-5.0f,0.0f},{0,0,1},{1,1}},//右下
-		{{+5.0f,+5.0f,0.0f},{0,0,1},{1,0}},//右上
+		{{-2.0f,-2.0f,0.0f},{0,0,1},{0,1}},//左下
+		{{-2.0f,+2.0f,0.0f},{0,0,1},{0,0}},//左上
+		{{+2.0f,-2.0f,0.0f},{0,0,1},{1,1}},//右下
+		{{+2.0f,+2.0f,0.0f},{0,0,1},{1,0}},//右上
 	};
 
 	//メンバ変数にコピー
@@ -614,15 +614,19 @@ void Object3d::UpdateViewMatrix()
 	//matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 	//視点座標
 	XMVECTOR eyePosition = XMLoadFloat3(&eye);
+	//１人称視点座標
+	XMVECTOR onemaneyePosition = XMLoadFloat3(&eye);
 	//注視点座標
 	XMVECTOR targetPosition = XMLoadFloat3(&target);
 	//(仮の)上方向
 	XMVECTOR upVector = XMLoadFloat3(&up);
 	//カメラZ軸(視線方向)
 	XMVECTOR cameraAxisZ = XMVectorSubtract(targetPosition, eyePosition);
+	XMVECTOR onemancameraAxisZ = XMVectorSubtract(targetPosition, onemaneyePosition);
 
 	//0ベクトルだと向きが定まらないので除外
 	assert(!XMVector3Equal(cameraAxisZ, XMVectorZero()));
+	//assert(!XMVector3Equal(onemancameraAxisZ, XMVectorZero());
 	assert(!XMVector3IsInfinite(cameraAxisZ));
 	assert(!XMVector3Equal(upVector, XMVectorZero()));
 	assert(!XMVector3IsInfinite(upVector));

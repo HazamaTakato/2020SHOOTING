@@ -39,7 +39,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	gameScene = new GameScene();
-	gameScene->Initialize(dx,input);
+	gameScene->Initialize(dx,input,audio);
 
 	while (true) 
 	{

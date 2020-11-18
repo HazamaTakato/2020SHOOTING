@@ -6,6 +6,7 @@
 #include"Object3d.h"
 #include"Sprite.h"
 #include"Input.h"
+#include"Audio.h"
 
 class GameScene
 {
@@ -19,13 +20,14 @@ private:
 public:
 	GameScene();
 	~GameScene();
-	void Initialize(DirectXSet* dx,Input* input);
+	void Initialize(DirectXSet* dx,Input* input,Audio* audio);
 	void Update();
 	void Draw();
 
 private:
 	DirectXSet* dx = nullptr;
 	Input* input = nullptr;
+	Audio* audio = nullptr;
 	Sprite* spriteBG = nullptr;
 	Object3d* object3d = nullptr;
 };

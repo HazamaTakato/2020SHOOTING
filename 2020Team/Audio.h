@@ -75,4 +75,9 @@ private: // ÉÅÉìÉoïœêî
 	ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
 	XAudio2VoiceCallback voiceCallback;
+	XAUDIO2_BUFFER buf{};
+	IUnknown* pXAPO;
+	XAUDIO2_EFFECT_DESCRIPTOR des;
+	XAUDIO2_EFFECT_CHAIN chain;
+	//FXREVERB_PARAMETERS effect;
 };

@@ -13,13 +13,15 @@ GameScene::~GameScene()
 	safe_delete(object3d);
 }
 
-void GameScene::Initialize(DirectXSet* dx, Input* input)
+void GameScene::Initialize(DirectXSet* dx, Input* input, Audio* audio)
 {
 	assert(dx);
 	assert(input);
+	assert(audio);
 
 	this->dx = dx;
 	this->input = input;
+	this->audio = audio;
 
 	if (!Sprite::LoadTexture(1, L"Resources/background.png")) {
 		assert(0);
@@ -31,6 +33,7 @@ void GameScene::Initialize(DirectXSet* dx, Input* input)
 	//object3dはマウスカーソル
 	object3d = Object3d::Create();
 	object3d->Update();
+
 }
 
 void GameScene::Update()
@@ -84,6 +87,11 @@ void GameScene::Update()
 		else if (input->PushKey(DIK_S)) { Object3d::CameraMoveVector({ 0.0f,-1.0f,0.0f }); }
 		if (input->PushKey(DIK_D)) { Object3d::CameraMoveVector({ +1.0f,0.0f,0.0f }); }
 		else if (input->PushKey(DIK_A)) { Object3d::CameraMoveVector({ -1.0f,0.0f,0.0f }); }
+	}
+
+	if (input->PushKey(DIK_SPACE))
+	{
+		audio->PlayWave("Resources/Alarm01.wav");
 	}
 	object3d->Update();
 }

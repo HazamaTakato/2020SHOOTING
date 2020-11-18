@@ -1,8 +1,10 @@
 #include "Audio.h"
 #include <fstream>
 #include <cassert>
-
+#include<xapofx.h>
+#include<xaudio2fx.h>
 #pragma comment(lib,"xaudio2.lib")
+//#pragma comment(lib,"xapofx.lib")
 
 bool Audio::Initialize()
 {
@@ -21,7 +23,7 @@ bool Audio::Initialize()
 		assert(0);
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -75,13 +77,47 @@ void Audio::PlayWave(const char * filename)
 	}
 
 	// 再生する波形データの設定
-	XAUDIO2_BUFFER buf{};
 	buf.pAudioData = (BYTE*)pBuffer;
 	buf.pContext = pBuffer;
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 	buf.AudioBytes = data.size;
 
+	des.InitialState = true;
+	des.OutputChannels = 2;
+	des.pEffect = pXAPO;
+
+	chain.EffectCount = 1;
+	chain.pEffectDescriptors = &des;
+
+
 	// 波形データの再生
+	result = pSourceVoice->SetEffectChain(&chain);
+	
+	XAUDIO2FX_REVERB_PARAMETERS Effectinfo;
+	Effectinfo.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
+	Effectinfo.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
+	Effectinfo.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
+	Effectinfo.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+	Effectinfo.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
+	Effectinfo.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+	Effectinfo.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
+	Effectinfo.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
+	Effectinfo.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
+	Effectinfo.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
+	Effectinfo.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
+	Effectinfo.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
+	Effectinfo.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
+	Effectinfo.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
+	Effectinfo.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
+	Effectinfo.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
+	Effectinfo.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
+	Effectinfo.ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
+	Effectinfo.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
+	Effectinfo.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
+	Effectinfo.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
+	Effectinfo.WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+
+	result = pSourceVoice->SetEffectParameters(0, &Effectinfo, sizeof(Effectinfo));
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
 	if FAILED(result) {
 		delete[] pBuffer;

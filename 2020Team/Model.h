@@ -43,6 +43,14 @@ public:
 	};
 
 private:
+
+	static const std::string baseDirectory;
+
+	static ID3D12Device* device;
+
+	static UINT descriptorHandleIncrementSize;
+
+private:
 	// 頂点バッファ
 	ComPtr<ID3D12Resource> vertBuff;
 	// インデックスバッファ
@@ -66,8 +74,21 @@ private:
 	Material material;
 
 public:
-	void CreateFromOBJ(std::string* name);
+	static void staticInitialize(ID3D12Device* device);
 
-	void Draw();
+	static Model* CreateFromOBJ(const std::string& modelname);
 
+public:
+
+	void Initialize(const std::string& modelname);
+
+	void Draw(ID3D12GraphicsCommandList* cmdList);
+
+private:
+
+	void LoadMaterial(const std::string& directoryPath, const std::string& filename);
+
+	void LoadTexture(const std::string& directoryPath, const std::string& filename);
+
+	void CreateDescriptorHeap();
 };

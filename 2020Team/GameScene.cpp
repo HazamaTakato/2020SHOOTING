@@ -91,7 +91,7 @@ void GameScene::Update()
 
 	if (input->PushKey(DIK_SPACE))
 	{
-		audio->PlayWave("Resources/Alarm01.wav");
+		audio->PlayWave("Resources/w.wav",100);
 	}
 	object3d->Update();
 }

@@ -69,7 +69,9 @@ public: // メンバ関数
 	bool Initialize();
 
 	// サウンドファイルの読み込みと再生
-	void PlayWave(const char* filename);
+	void PlayWave(const char* filename,float a);
+
+	void StopWave();
 
 private: // メンバ変数
 	ComPtr<IXAudio2> xAudio2;

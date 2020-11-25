@@ -3,6 +3,7 @@
 #include <cassert>
 #include<xapofx.h>
 #include<xaudio2fx.h>
+#include<xapo.h>
 #pragma comment(lib,"xaudio2.lib")
 //#pragma comment(lib,"xapofx.lib")
 
@@ -27,7 +28,7 @@ bool Audio::Initialize()
 	return true;
 }
 
-void Audio::PlayWave(const char * filename)
+void Audio::PlayWave(const char * filename,float a,UINT32 count)
 {
 	HRESULT result;
 	// ファイルストリーム
@@ -68,7 +69,7 @@ void Audio::PlayWave(const char * filename)
 	wfex.wBitsPerSample = format.fmt.nBlockAlign * 8 / format.fmt.nChannels;
 
 	// 波形フォーマットを元にSourceVoiceの生成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	//IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &wfex, 0, 2.0f, &voiceCallback);
 	if FAILED(result) {
 		delete[] pBuffer;
@@ -81,6 +82,7 @@ void Audio::PlayWave(const char * filename)
 	buf.pContext = pBuffer;
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 	buf.AudioBytes = data.size;
+	buf.LoopCount = count;//今流してる音+count回ループする
 
 	des.InitialState = true;
 	des.OutputChannels = 2;
@@ -94,28 +96,33 @@ void Audio::PlayWave(const char * filename)
 	result = pSourceVoice->SetEffectChain(&chain);
 	
 	XAUDIO2FX_REVERB_PARAMETERS Effectinfo;
-	Effectinfo.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;
-	Effectinfo.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;
-	Effectinfo.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;
-	Effectinfo.PositionLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	Effectinfo.PositionRight = XAUDIO2FX_REVERB_DEFAULT_POSITION;
-	Effectinfo.PositionMatrixLeft = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	Effectinfo.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;
-	Effectinfo.EarlyDiffusion = XAUDIO2FX_REVERB_DEFAULT_EARLY_DIFFUSION;
-	Effectinfo.LateDiffusion = XAUDIO2FX_REVERB_DEFAULT_LATE_DIFFUSION;
-	Effectinfo.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;
-	Effectinfo.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;
-	Effectinfo.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;
-	Effectinfo.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;
-	Effectinfo.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;
-	Effectinfo.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;
-	Effectinfo.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;
-	Effectinfo.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;
-	Effectinfo.ReverbGain = XAUDIO2FX_REVERB_DEFAULT_REVERB_GAIN;
-	Effectinfo.DecayTime = XAUDIO2FX_REVERB_DEFAULT_DECAY_TIME;
-	Effectinfo.Density = XAUDIO2FX_REVERB_DEFAULT_DENSITY;
-	Effectinfo.RoomSize = XAUDIO2FX_REVERB_DEFAULT_ROOM_SIZE;
-	Effectinfo.WetDryMix = XAUDIO2FX_REVERB_DEFAULT_WET_DRY_MIX;
+	//XAUDIO2FX_REVERB_PARAMETERSの詳細
+	//↓のページから
+	//https://docs.microsoft.com/ja-jp/windows/win32/api/xaudio2fx/ns-xaudio2fx-xaudio2fx_reverb_parameters
+	Effectinfo.ReflectionsDelay = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_DELAY;//最初の反射の遅延時間
+	Effectinfo.ReverbDelay = XAUDIO2FX_REVERB_DEFAULT_REVERB_DELAY;//最初の反射のリバーブの遅延
+	Effectinfo.RearDelay = XAUDIO2FX_REVERB_DEFAULT_REAR_DELAY;//左右リア出力の遅延
+	Effectinfo.SideDelay = XAUDIO2FX_REVERB_DEFAULT_7POINT1_SIDE_DELAY;//左と右の出力の遅延時間※Win10以降でサポート
+	Effectinfo.PositionLeft = 30;//リスナーに対するシミュレートされた空間内の左側の入力位置
+	Effectinfo.PositionRight = 30;//↑の右側の入力位置
+	Effectinfo.PositionMatrixLeft = 30;//左側のソースからリスナーまでの距離の印象 あまり効果がない可能性有
+	Effectinfo.PositionMatrixRight = XAUDIO2FX_REVERB_DEFAULT_POSITION_MATRIX;//↑の右側版
+	Effectinfo.EarlyDiffusion = 4;//個々の壁の残響の特性を制御。硬い平面をシミュレートするには最小値に設定し、拡散面をシミュレートするには最大値に設定します
+	Effectinfo.LateDiffusion = 15;//↑と同じ
+	Effectinfo.LowEQGain = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_GAIN;//1khzでの減衰時間に対して低周波数の減衰時間を調整
+	Effectinfo.LowEQCutoff = XAUDIO2FX_REVERB_DEFAULT_LOW_EQ_CUTOFF;//↑によって制御されるローパスフィルターのコーナー周波数を設定
+	Effectinfo.HighEQGain = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_GAIN;//1khzでの減衰時間に対して高周波数の減衰時間の調整
+	Effectinfo.HighEQCutoff = XAUDIO2FX_REVERB_DEFAULT_HIGH_EQ_CUTOFF;//↑によって制御されるハイパスフィルターのコーナー周波数を設定
+	Effectinfo.RoomFilterFreq = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_FREQ;//ルームエフェクトのローパスフィルターのコーナー周波数を設定
+	Effectinfo.RoomFilterMain = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_MAIN;//初期反射と後期フィールド残響の両方について、ローパスフィルターの通過帯域強度レベルを設定
+	Effectinfo.RoomFilterHF = XAUDIO2FX_REVERB_DEFAULT_ROOM_FILTER_HF;//コーナー周波数での初期反射と後期フィールド残響の両方のローパスフィルターの強度を設定
+	Effectinfo.ReflectionsGain = XAUDIO2FX_REVERB_DEFAULT_REFLECTIONS_GAIN;//初期反射の強度を調整
+	Effectinfo.ReverbGain = 20;//残響の強さを調整
+	Effectinfo.DecayTime = INFINITY;//1kHzでの残響減衰時間 0.1～無限秒
+	Effectinfo.Density = 100;//後期フィールド残響のモード密度を制御
+	Effectinfo.RoomSize = 100;//音響空間の見かけのサイズ
+	Effectinfo.WetDryMix = a;//リバーブになる出力のパーセント　基本100
+	Effectinfo.DisableLateField = FALSE;//TRUEにすると、レイトフィールドリフレクション計算無効。レイトフィールドリフレクションの計算を無効にすると、CPU時間を大幅に節約
 
 	result = pSourceVoice->SetEffectParameters(0, &Effectinfo, sizeof(Effectinfo));
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
@@ -131,4 +138,10 @@ void Audio::PlayWave(const char * filename)
 		assert(0);
 		return;
 	}
+}
+
+void Audio::StopWave()
+{
+	HRESULT result;
+	result = pSourceVoice->Stop();
 }

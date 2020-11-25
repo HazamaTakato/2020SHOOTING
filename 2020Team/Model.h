@@ -3,7 +3,8 @@
 #include<d3d12.h>
 #include<DirectXMath.h>
 #include<d3dx12.h>
-
+#include<unordered_map>
+#include<wrl.h>
 
 class Model
 {
@@ -22,6 +23,16 @@ public:
 		XMFLOAT3 pos;	//xyz
 		XMFLOAT3 normal;	//法線
 		XMFLOAT2 uv;	//uv
+	};
+
+	struct ConstBufferDataB1
+	{
+		XMFLOAT3 ambient;//アンビエント係数
+		float pad1;	//パディング
+		XMFLOAT3 diffuse;//ディフューズ係数
+		float pad2;	//パディング
+		XMFLOAT3 specular;//スペキュラー係数
+		float alpha;	//アルファ
 	};
 
 	//マテリアル
@@ -56,7 +67,11 @@ private:
 	// インデックスバッファ
 	ComPtr<ID3D12Resource> indexBuff;
 	// テクスチャバッファ
-	ComPtr<ID3D12Resource> texbuff;
+	ComPtr<ID3D12Resource> texBuff;
+	// 定数バッファ
+	ComPtr<ID3D12Resource> constBuff; 
+	// デスクリプタヒープ
+	ComPtr<ID3D12DescriptorHeap> descHeap;
 	// シェーダリソースビューのハンドル(CPU)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
 	// シェーダリソースビューのハンドル(CPU)
@@ -73,6 +88,10 @@ private:
 	//マテリアル
 	Material material;
 
+	std::string name;
+
+	std::unordered_map<std::string, Material*>materials;
+
 public:
 	static void staticInitialize(ID3D12Device* device);
 
@@ -81,6 +100,8 @@ public:
 public:
 
 	void Initialize(const std::string& modelname);
+
+	void Update();
 
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 

@@ -3,6 +3,7 @@
 #include<Windows.h>
 #include<xaudio2.h>
 #include<wrl.h>
+#include"Input.h"
 
 /// <summary>
 /// オーディオコールバック
@@ -69,11 +70,12 @@ public: // メンバ関数
 	bool Initialize();
 
 	// サウンドファイルの読み込みと再生
-	void PlayWave(const char* filename,float a);
+	void PlayWave(const char* filename,float a,UINT32 count);
 
 	void StopWave();
 
 private: // メンバ変数
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice;
 	XAudio2VoiceCallback voiceCallback;

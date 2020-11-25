@@ -28,7 +28,7 @@ bool Audio::Initialize()
 	return true;
 }
 
-void Audio::PlayWave(const char * filename,float a)
+void Audio::PlayWave(const char * filename,float a,UINT32 count)
 {
 	HRESULT result;
 	// ファイルストリーム
@@ -69,7 +69,7 @@ void Audio::PlayWave(const char * filename,float a)
 	wfex.wBitsPerSample = format.fmt.nBlockAlign * 8 / format.fmt.nChannels;
 
 	// 波形フォーマットを元にSourceVoiceの生成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	//IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2->CreateSourceVoice(&pSourceVoice, &wfex, 0, 2.0f, &voiceCallback);
 	if FAILED(result) {
 		delete[] pBuffer;
@@ -82,7 +82,7 @@ void Audio::PlayWave(const char * filename,float a)
 	buf.pContext = pBuffer;
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 	buf.AudioBytes = data.size;
-	buf.LoopCount = 1;//今流してる音+LoopCount回ループする
+	buf.LoopCount = count;//今流してる音+count回ループする
 
 	des.InitialState = true;
 	des.OutputChannels = 2;
@@ -138,6 +138,10 @@ void Audio::PlayWave(const char * filename,float a)
 		assert(0);
 		return;
 	}
+}
 
-	if()
+void Audio::StopWave()
+{
+	HRESULT result;
+	result = pSourceVoice->Stop();
 }

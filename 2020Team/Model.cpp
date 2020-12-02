@@ -5,11 +5,9 @@
 #include<DirectXTex.h>
 
 using namespace std;
-
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
-
 
 const std::string Model::baseDirectory = "Resources/";
 ID3D12Device* Model::device = nullptr;
@@ -20,7 +18,6 @@ void Model::staticInitialize(ID3D12Device * device)
 	assert(!device);
 
 	Model::device = device;
-
 
 }
 
@@ -99,13 +96,11 @@ void Model::Initialize(const std::string & modelname)
 			line_stream >> normal.z;
 			normals.emplace_back(normal);
 		}
-		//if (key == "usemtl")
-		//{
-		//	string materialname;
-		//	line_stream >> materialname;
-
-		//	auto itr = materials.find(materialname);
-		//}
+		if (key == "usemtl")
+		{
+			string materialname;
+			line_stream >> materialname;
+		}
 		if (key == "f")
 		{
 			int faceIndexCount = 0;
@@ -119,7 +114,7 @@ void Model::Initialize(const std::string & modelname)
 				index_stream >> indexPosition;
 				Material* material;
 				index_stream.seekg(1, ios_base::cur);//スラッシュを飛ばす
-				if (material)
+				if (material&&material->textureFilename.size() > 0)
 				{
 					index_stream >> indexTexcoord;
 					index_stream.seekg(1, ios_base::cur);
@@ -130,7 +125,6 @@ void Model::Initialize(const std::string & modelname)
 					vertex.normal = normals[indexNormal - 1];
 					vertex.uv = texcoords[indexTexcoord - 1];
 					vertices.emplace_back(vertex);
-					indices.emplace_back(indices.size());
 				}
 				else 
 				{
@@ -153,20 +147,20 @@ void Model::Initialize(const std::string & modelname)
 						VertexPosNormalUv vertex{};
 						vertex.pos = positions[indexPosition - 1];
 						vertex.normal = normals[indexNormal - 1];
-						vertex.uv = texcoords[indexTexcoord - 1];
+						vertex.uv = { 0,0 };
 						vertices.emplace_back(vertex);
 					}
 				}
 				//インデックスデータの追加
 				if (faceIndexCount >= 3)
 				{
-					vertices.emplace_back(indexCountTex - 1);
-					vertices.emplace_back(indexCountTex);
-					vertices.emplace_back(indexCountTex - 3);
+					indices.emplace_back(indexCountTex - 1);
+					indices.emplace_back(indexCountTex);
+					indices.emplace_back(indexCountTex - 3);
 				}
 				else
 				{
-					vertices.emplace_back(indexCountTex);
+					indices.emplace_back(indexCountTex);
 				}
 				indexCountTex++;
 				faceIndexCount++;
@@ -204,7 +198,7 @@ void Model::Initialize(const std::string & modelname)
 	}
 
 	//頂点バッファへのデータ転送
-	VertexPosNormalUv*vertMap = nullptr;
+	VertexPosNormalUv* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	if (SUCCEEDED(result))
 	{
@@ -213,7 +207,7 @@ void Model::Initialize(const std::string & modelname)
 	}
 
 	//インデックスバッファへのデータ転送
-	VertexPosNormalUv* indexMap = nullptr;
+	unsigned short* indexMap = nullptr;
 	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
 	if (SUCCEEDED(result))
 	{
